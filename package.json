@@ -1,0 +1,67 @@
+{
+  "name": "@gibme/tablo.tv",
+  "version": "0.0.1",
+  "description": "API interface for interacting with a Tablo TV device",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/*"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "build": "yarn build:typescript",
+    "build:docs": "./node_modules/.bin/typedoc",
+    "build:typescript": "./node_modules/.bin/tsc",
+    "test": "yarn test:style && yarn test:typecheck && yarn test:mocha",
+    "test:typecheck": "./node_modules/.bin/tsc --noEmit",
+    "test:style": "yarn style",
+    "test:mocha": "./node_modules/.bin/mocha --exit --timeout 120000 --require ts-node/register test/test.ts",
+    "style": "./node_modules/.bin/eslint src/**/*.ts test/**/*.ts",
+    "fix-style": "./node_modules/.bin/eslint --fix src/**/*.ts test/**/*.ts",
+    "fix:style": "yarn fix-style",
+    "prepublishOnly": "yarn build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gibme-npm/tablo.tv.git"
+  },
+  "bugs": {
+    "url": "https://github.com/gibme-npm/tablo.tv/issues"
+  },
+  "homepage": "https://gibme-npm.github.io/tablo.tv/",
+  "engines": {
+    "node": ">=18"
+  },
+  "engineStrict": true,
+  "author": {
+    "name": "Brandon Lehmann",
+    "email": "brandonlehmann@gmail.com"
+  },
+  "dependencies": {
+    "@gibme/cache": "^2.0.0",
+    "@gibme/fetch": "^2.0.0",
+    "@gibme/logger": "^1.0.14",
+    "@gibme/timer": "^1.0.14",
+    "@types/which": "^3.0.4",
+    "ffmpeg-static": "^5.2.0",
+    "uuid": "^11.1.0",
+    "which": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.15.19",
+    "@typescript-eslint/eslint-plugin": "^6.19.1",
+    "@typescript-eslint/parser": "^6.19.1",
+    "dotenv": "^16.5.0",
+    "eslint": "^8.56.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-n": "^16.6.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^6.1.1",
+    "mocha": "^11.2.2",
+    "ts-node": "^10.9.2",
+    "typedoc": "^0.28.4",
+    "typescript": "^5.8.3"
+  }
+}
