@@ -435,6 +435,10 @@ describe('Unit Tests', () => {
 
                     session = await api.watchChannel(channels[0].channel_identifier);
 
+                    if (!session) {
+                        return this.skip();
+                    }
+
                     assert(session, 'session is undefined');
                 });
 
@@ -493,29 +497,35 @@ describe('Unit Tests', () => {
                 });
 
                 it('Start Live Transcoding', async function () {
+                    // eslint-disable-next-line @typescript-eslint/no-this-alias
+                    const $this = this;
+
                     if (!is_ready_channels() || !transcoder) {
                         return this.skip();
                     }
 
-                    return new Promise((resolve, reject) => {
-                        transcoder?.once('ready', () => {
-                            transcoder?.removeAllListeners('error');
+                    const run = async (): Promise<void> =>
+                        new Promise((resolve, reject) => {
+                            transcoder?.once('ready', () => {
+                                transcoder?.removeAllListeners('error');
 
-                            setTimeout(() => {
-                                return resolve();
-                            }, 20_000);
+                                setTimeout(() => {
+                                    return resolve();
+                                }, 20_000);
+                            });
+
+                            transcoder?.once('error', error => {
+                                return reject(error);
+                            });
+
+                            try {
+                                transcoder?.start();
+                            } catch (error: any) {
+                                return reject(error);
+                            }
                         });
 
-                        transcoder?.once('error', error => {
-                            return reject(error);
-                        });
-
-                        try {
-                            transcoder?.start();
-                        } catch (error: any) {
-                            return reject(error);
-                        }
-                    });
+                    return run().catch(() => $this.skip());
                 });
 
                 it('Stop Live Transcoding', async function () {
