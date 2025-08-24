@@ -1,6 +1,6 @@
 {
   "name": "@gibme/tablo.tv",
-  "version": "0.0.1",
+  "version": "20.0.0",
   "description": "API interface for interacting with a Tablo TV device",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -30,7 +30,7 @@
   },
   "homepage": "https://gibme-npm.github.io/tablo.tv/",
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "engineStrict": true,
   "author": {
@@ -38,10 +38,10 @@
     "email": "brandonlehmann@gmail.com"
   },
   "dependencies": {
-    "@gibme/cache": "^2.0.0",
-    "@gibme/fetch": "^2.0.0",
-    "@gibme/logger": "^1.0.14",
-    "@gibme/timer": "^1.0.14",
+    "@gibme/cache": "^20.0.0",
+    "@gibme/fetch": "^20.0.0",
+    "@gibme/logger": "^20.0.0",
+    "@gibme/timer": "^20.0.0",
     "@types/which": "^3.0.4",
     "ffmpeg-static": "^5.2.0",
     "uuid": "^11.1.0",
@@ -49,19 +49,19 @@
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
-    "@types/node": "^22.15.19",
+    "@types/node": "^24.3.0",
     "@typescript-eslint/eslint-plugin": "^6.19.1",
     "@typescript-eslint/parser": "^6.19.1",
-    "dotenv": "^16.5.0",
+    "dotenv": "^17.2.1",
     "eslint": "^8.56.0",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-n": "^16.6.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^6.1.1",
-    "mocha": "^11.2.2",
+    "mocha": "^11.7.1",
     "ts-node": "^10.9.2",
     "typedoc": "^0.28.4",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.2"
   }
 }
