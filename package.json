@@ -1,11 +1,23 @@
 {
   "name": "@gibme/tablo.tv",
-  "version": "20.0.0",
+  "version": "20.0.1",
   "description": "API interface for interacting with a Tablo TV device",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist/*"
+  ],
+  "keywords": [
+    "tablo",
+    "tv",
+    "api",
+    "client",
+    "interface",
+    "discovery",
+    "management",
+    "control",
+    "channel",
+    "live"
   ],
   "license": "MIT",
   "scripts": {
