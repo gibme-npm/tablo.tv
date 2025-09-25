@@ -1,6 +1,6 @@
 {
   "name": "@gibme/tablo.tv",
-  "version": "20.0.1",
+  "version": "20.0.2",
   "description": "API interface for interacting with a Tablo TV device",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -50,7 +50,7 @@
     "email": "brandonlehmann@gmail.com"
   },
   "dependencies": {
-    "@gibme/cache": "^20.0.0",
+    "@gibme/cache": "^20.0.1",
     "@gibme/fetch": "^20.0.0",
     "@gibme/logger": "^20.0.0",
     "@gibme/timer": "^20.0.0",
