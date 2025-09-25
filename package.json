@@ -50,7 +50,7 @@
     "email": "brandonlehmann@gmail.com"
   },
   "dependencies": {
-    "@gibme/cache": "^20.0.1",
+    "@gibme/cache": "^20.0.2",
     "@gibme/fetch": "^20.0.0",
     "@gibme/logger": "^20.0.0",
     "@gibme/timer": "^20.0.0",
