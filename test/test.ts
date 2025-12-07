@@ -23,7 +23,7 @@ import Tablo, { Lighthouse, LiveTranscoder } from '../src';
 import assert from 'assert';
 import { config } from 'dotenv';
 
-config();
+config({ quiet: true });
 
 const PULL_AIRINGS = process.env.PULL_AIRINGS === 'true' || process.env.PULL_AIRINGS === '1';
 

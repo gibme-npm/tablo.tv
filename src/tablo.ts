@@ -123,7 +123,7 @@ export class Tablo extends TabloAPI {
             }).sort((a, b) => {
                 return (a.channel.major + (a.channel.minor * 0.1)) - (b.channel.major + (b.channel.minor * 0.1));
             });
-        } catch (error: any) {
+        } catch {
             return [];
         }
     }

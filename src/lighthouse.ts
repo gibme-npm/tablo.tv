@@ -33,7 +33,6 @@ export class Lighthouse {
     private token?: Token;
     private context_token: string = '';
 
-    // eslint-disable-next-line no-useless-constructor
     constructor (
         private readonly email: string,
         private readonly password: string,
