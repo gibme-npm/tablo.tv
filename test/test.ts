@@ -252,8 +252,10 @@ describe('Unit Tests', () => {
                     assert.strictEqual(typeof tuner.in_use, 'boolean', 'in_use is not a boolean');
 
                     if (tuner.channel) {
-                        assert.strictEqual(typeof tuner.channel.call_sign, 'string', 'channel.call_sign is not a string');
-                        assert.strictEqual(typeof tuner.channel.channel_identifier, 'string', 'channel.channel_identifier is not a string');
+                        assert.strictEqual(typeof tuner.channel.call_sign, 'string',
+                            'channel.call_sign is not a string');
+                        assert.strictEqual(typeof tuner.channel.channel_identifier, 'string',
+                            'channel.channel_identifier is not a string');
                     }
                 }
             });

@@ -320,7 +320,6 @@ export class Lighthouse {
             ? `${endpoint}?${qs.toString()}`
             : `${this.base_uri}${endpoint}?${qs.toString()}`;
 
-
         const response = await fetch(url, {
             headers,
             json: (method === 'PATCH' || method === 'POST' || method === 'PUT') ? payload : undefined,

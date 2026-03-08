@@ -23,7 +23,6 @@ import { v4 as uuid } from 'uuid';
 import { createHash, createHmac } from 'crypto';
 import type { Tablo } from './tablo';
 
-
 type Credentials = {
     access_key: string;
     secret_key: string;
@@ -239,7 +238,6 @@ export class TabloAPI {
         if (Object.entries(params).length > 0) {
             url += `?${qs.toString()}`;
         }
-
 
         return fetch(url, {
             headers,
