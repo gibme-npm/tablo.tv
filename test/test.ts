@@ -32,7 +32,7 @@ describe('Unit Tests', () => {
     let virtuals: Lighthouse.Device[] = [];
 
     describe('Lighthouse API', () => {
-        describe('Static Methods', async () => {
+        describe('Static Methods', () => {
             it('List Available Devices', async () => {
                 devices = await Lighthouse.listAvailableDevices();
 
@@ -60,7 +60,7 @@ describe('Unit Tests', () => {
             });
         });
 
-        describe('Instance Methods', async () => {
+        describe('Instance Methods', () => {
             const email = process.env.LIGHTHOUSE_EMAIL ?? '';
             const password = process.env.LIGHTHOUSE_PASSWORD ?? '';
 
@@ -160,7 +160,7 @@ describe('Unit Tests', () => {
             });
 
             it('Get Channel Airings', async function () {
-                if (!is_ready_context()) {
+                if (!is_ready_context() || channels.length === 0) {
                     return this.skip();
                 }
 
@@ -200,12 +200,14 @@ describe('Unit Tests', () => {
                 if (info) {
                     api = maybe_api;
 
+                    console.log(`        Using device: ${device.url}`);
+
                     break;
                 }
             }
         });
 
-        describe('General Methods', async () => {
+        describe('General Methods', () => {
             it('Device Information', async function () {
                 if (!is_ready()) {
                     return this.skip();
@@ -243,7 +245,17 @@ describe('Unit Tests', () => {
 
                 const tuners = await api.tuners();
 
-                assert(tuners, 'tuners is undefined');
+                assert(Array.isArray(tuners), 'tuners is not an array');
+                assert(tuners.length > 0, 'tuners is empty');
+
+                for (const tuner of tuners) {
+                    assert.strictEqual(typeof tuner.in_use, 'boolean', 'in_use is not a boolean');
+
+                    if (tuner.channel) {
+                        assert.strictEqual(typeof tuner.channel.call_sign, 'string', 'channel.call_sign is not a string');
+                        assert.strictEqual(typeof tuner.channel.channel_identifier, 'string', 'channel.channel_identifier is not a string');
+                    }
+                }
             });
 
             it('Hard Drives', async function () {
@@ -299,7 +311,7 @@ describe('Unit Tests', () => {
             });
         });
 
-        describe('Updates', async () => {
+        describe('Updates', () => {
             it('Update Information', async function () {
                 if (!is_ready()) {
                     return this.skip();
@@ -321,7 +333,7 @@ describe('Unit Tests', () => {
             });
         });
 
-        describe('Channels', async () => {
+        describe('Channels', () => {
             let scan_idx: number | string = 0;
 
             it('Channel Scan Information', async function () {
@@ -357,7 +369,7 @@ describe('Unit Tests', () => {
                 assert(channels.length > 0, 'channels is empty');
             });
 
-            it('Channel', async function () {
+            it('Channel (by identifier)', async function () {
                 if (!is_ready_channels()) {
                     return this.skip();
                 }
@@ -365,6 +377,28 @@ describe('Unit Tests', () => {
                 const channel = await api.channel(channels[0].channel_identifier);
 
                 assert(channel, 'channel is undefined');
+                assert.strictEqual(channel.channel_identifier, channels[0].channel_identifier,
+                    'channel_identifier mismatch');
+            });
+
+            it('Channel (by path)', async function () {
+                if (!is_ready()) {
+                    return this.skip();
+                }
+
+                const tuners = await api.tuners();
+                const active = tuners.find(t => t.channel !== null);
+
+                if (!active) {
+                    return this.skip();
+                }
+
+                const channel = active.channel!;
+
+                assert.strictEqual(typeof channel.call_sign, 'string', 'call_sign is not a string');
+                assert.strictEqual(typeof channel.channel_identifier, 'string', 'channel_identifier is not a string');
+                assert.strictEqual(typeof channel.major, 'number', 'major is not a number');
+                assert.strictEqual(typeof channel.minor, 'number', 'minor is not a number');
             });
 
             it('Guide Status', async function () {
@@ -412,8 +446,8 @@ describe('Unit Tests', () => {
             });
         });
 
-        describe('Watch Sessions', async () => {
-            describe('Session Management', async () => {
+        describe('Watch Sessions', () => {
+            describe('Session Management', () => {
                 let session: Tablo.PlayerSession | undefined;
 
                 const is_ready_session = (): boolean =>
@@ -487,20 +521,32 @@ describe('Unit Tests', () => {
                 });
             });
 
-            describe('Live Transcoding', async () => {
+            describe('Live Transcoding', () => {
                 let transcoder: LiveTranscoder | undefined;
+
+                let transcoder_error: Error | undefined;
 
                 before(async () => {
                     try {
                         transcoder = await LiveTranscoder.instance(api, channels[0].channel_identifier, './streams');
-                    } catch {}
+                    } catch (error: any) {
+                        transcoder_error = error;
+                    }
                 });
 
                 it('Start Live Transcoding', async function () {
                     // eslint-disable-next-line @typescript-eslint/no-this-alias
                     const $this = this;
 
-                    if (!is_ready_channels() || !transcoder) {
+                    if (!is_ready_channels()) {
+                        return this.skip();
+                    }
+
+                    if (!transcoder) {
+                        if (transcoder_error) {
+                            console.warn(`        ⚠ LiveTranscoder failed: ${transcoder_error.message}`);
+                        }
+
                         return this.skip();
                     }
 

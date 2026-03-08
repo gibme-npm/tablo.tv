@@ -66,7 +66,7 @@ export class Tablo extends TabloAPI {
             }
         };
 
-        const { now, start } = this.currentHour;
+        const { now } = this.currentHour;
 
         try {
             const result: Tablo.Airing[] = !force_refresh ? await this.cache.get('airings') ?? [] : [];
@@ -95,7 +95,9 @@ export class Tablo extends TabloAPI {
                                 duration: response.airing_details.duration,
                                 episode: {
                                     ...response.episode,
-                                    orig_air_date: new Date(response.episode.orig_air_date)
+                                    orig_air_date: response.episode.orig_air_date
+                                        ? new Date(response.episode.orig_air_date)
+                                        : new Date(0)
                                 },
                                 channel: {
                                     ...response.airing_details.channel.channel
@@ -119,9 +121,9 @@ export class Tablo extends TabloAPI {
                 const start_time = new Date(airing.start_time).getTime();
                 const end_time = new Date(airing.end_time).getTime();
 
-                return start_time >= start && start_time < now && end_time > now;
+                return start_time < now && end_time > now;
             }).sort((a, b) => {
-                return (a.channel.major + (a.channel.minor * 0.1)) - (b.channel.major + (b.channel.minor * 0.1));
+                return (a.channel.major * 1000 + a.channel.minor) - (b.channel.major * 1000 + b.channel.minor);
             });
         } catch {
             return [];
@@ -168,6 +170,15 @@ export class Tablo extends TabloAPI {
     }
 
     public async channel (channel_id: string, timeout = this.timeout): Promise<Tablo.Channel | undefined> {
+        if (channel_id.startsWith('/')) {
+            try {
+                return (await this.get<{ channel: Tablo.Channel }>(
+                    channel_id, undefined, timeout))?.channel;
+            } catch {
+                return undefined;
+            }
+        }
+
         const channels = await this.channels(timeout);
 
         return channels.find(elem => elem.channel_identifier === channel_id);
@@ -194,7 +205,7 @@ export class Tablo extends TabloAPI {
                     };
                 })
                 .sort((a, b) => {
-                    return (a.major + (a.minor * 0.1)) - (b.major + (b.minor * 0.1));
+                    return (a.major * 1000 + a.minor) - (b.major * 1000 + b.minor);
                 });
         } catch {
             return [];
@@ -421,8 +432,19 @@ export class Tablo extends TabloAPI {
      */
     public async tuners (timeout = this.timeout): Promise<Tablo.Tuner[]> {
         try {
-            // todo: resolve the channel property with actual information
-            return (await this.get('/server/tuners', undefined, timeout) ?? []);
+            const tuners = await this.get<{
+                in_use: boolean;
+                channel: string | null;
+                recording: string | null;
+                channel_identifier: string | null;
+            }[]>('/server/tuners', undefined, timeout) ?? [];
+
+            return Promise.all(tuners.map(async tuner => ({
+                ...tuner,
+                channel: tuner.channel
+                    ? await this.channel(tuner.channel, timeout) ?? null
+                    : null
+            })));
         } catch {
             return [];
         }
@@ -575,14 +597,14 @@ export namespace Tablo {
 
     export type Tuner = {
         in_use: boolean;
-        channel: string | null;
+        channel: Channel | null;
         recording: string | null;
         channel_identifier: string | null;
     }
 
     export type Settings = {
         led: string;
-        extended_live_recordings: boolean;
+        extend_live_recordings: boolean;
         auto_delete_recordings: boolean;
         exclude_duplicates: boolean;
         preferred_audio_track: string;

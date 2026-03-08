@@ -19,7 +19,7 @@
 // SOFTWARE.
 
 import fetch from '@gibme/fetch';
-import Logger from '@gibme/logger';
+
 import { Logo } from './types';
 
 type Token = {
@@ -36,8 +36,7 @@ export class Lighthouse {
     constructor (
         private readonly email: string,
         private readonly password: string,
-        public readonly timeout = 2000,
-        private readonly request_logging = false
+        public readonly timeout = 2000
     ) {
     }
 
@@ -321,20 +320,12 @@ export class Lighthouse {
             ? `${endpoint}?${qs.toString()}`
             : `${this.base_uri}${endpoint}?${qs.toString()}`;
 
-        if (this.request_logging) {
-            Logger.debug(
-                '%s %s %s %s',
-                method,
-                JSON.stringify(headers),
-                url,
-                payload ? JSON.stringify(payload) : ''
-            );
-        }
 
         const response = await fetch(url, {
             headers,
             json: (method === 'PATCH' || method === 'POST' || method === 'PUT') ? payload : undefined,
-            method
+            method,
+            timeout
         });
 
         if (!response.ok) {

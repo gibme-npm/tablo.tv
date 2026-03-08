@@ -30,10 +30,15 @@ import Timer from '@gibme/timer';
 
 export default class LiveTranscoder extends EventEmitter {
     private static readonly instances = new Map<string, LiveTranscoder>();
-    private readonly ffmpeg_path = ffmpeg ?? which.sync('ffmpeg');
+    private readonly ffmpeg_path: string;
     private process?: ChildProcess;
     private timer?: Timer;
     private emitter = new EventEmitter();
+    private restart_count = 0;
+    private stopping = false;
+    private static readonly MAX_RESTARTS = 5;
+    private static readonly READY_TIMEOUT = 30_000;
+    private static readonly MIN_KEEPALIVE = 60;
 
     /**
      * Creates a new live transcoder instance.
@@ -60,14 +65,16 @@ export default class LiveTranscoder extends EventEmitter {
     ) {
         super();
 
-        this.emitter.on('abort', async () => {
-            if (this.process) {
-                this.process.stdin?.write('q', error => {
-                    if (error) {
-                        this.emit('error', error);
-                    }
-                });
+        try {
+            this.ffmpeg_path = ffmpeg ?? which.sync('ffmpeg');
+        } catch {
+            throw new Error('ffmpeg is not installed. Install ffmpeg or ensure ffmpeg-static provides a valid binary.');
+        }
 
+        this.emitter.on('abort', async () => {
+            this.stopping = true;
+
+            if (this.process) {
                 try {
                     if (!this.process.killed) {
                         this.process.kill();
@@ -93,18 +100,26 @@ export default class LiveTranscoder extends EventEmitter {
 
         this.emitter.on('stopped', () => {
             try {
-                const current_path = resolve(output_path, `./${this.id}`);
+                const current_path = resolve(this.output_path, `./${this.id}`);
+                const base = resolve(this.output_path);
 
-                if (existsSync(current_path)) {
+                if (current_path.startsWith(base) && existsSync(current_path)) {
                     rmSync(current_path, { recursive: true, force: true });
                 }
             } catch {
             }
 
+            LiveTranscoder.instances.delete(this.id);
+
             this.emit('stopped');
         });
 
+        const base_path = resolve(output_path);
         this.full_path = resolve(output_path, `./${this.id}`);
+
+        if (!this.full_path.startsWith(base_path)) {
+            throw new Error('Resolved output path escapes the base output directory');
+        }
 
         if (existsSync(this.full_path)) {
             rmSync(this.full_path, { recursive: true, force: true });
@@ -269,7 +284,9 @@ export default class LiveTranscoder extends EventEmitter {
             return false;
         }
 
-        this.timer = new Timer((this.session.keepalive - 30) * 1000);
+        const keepalive_interval = Math.max(this.session.keepalive - 30, LiveTranscoder.MIN_KEEPALIVE) * 1000;
+
+        this.timer = new Timer(keepalive_interval);
 
         this.timer.on('tick', async () => {
             if (this.session) {
@@ -279,14 +296,22 @@ export default class LiveTranscoder extends EventEmitter {
 
         this._use_count++;
 
+        this.restart_count = 0;
+
         const started = this.start_ffmpeg();
 
         if (started) {
+            const deadline = Date.now() + LiveTranscoder.READY_TIMEOUT;
+
             const check = () => setTimeout(() => {
                 if (existsSync(this.full_path)) {
                     this.active = true;
 
                     this.emit('ready');
+                } else if (Date.now() >= deadline) {
+                    this.emit('error', new Error('Timed out waiting for ffmpeg to produce output'));
+
+                    this.emitter.emit('abort');
                 } else {
                     check();
                 }
@@ -302,9 +327,11 @@ export default class LiveTranscoder extends EventEmitter {
      * Stops the live transcoder.
      */
     public stop (): void {
-        this._use_count--;
+        if (this._use_count > 0) {
+            this._use_count--;
+        }
 
-        if (this.active && this.use_count <= 0) {
+        if (this.active && this._use_count <= 0) {
             this.emitter.emit('abort');
         }
     }
@@ -334,24 +361,40 @@ export default class LiveTranscoder extends EventEmitter {
             stdio: ['pipe', 'ignore', 'ignore']
         });
 
-        this.process.on('error', error => {
-            this.emit('error', error);
+        const handle_restart = () => {
+            if (this.stopping) {
+                return;
+            }
 
             if (!this.auto_restart) {
                 this.emitter.emit('abort');
-            } else {
-                this.start_ffmpeg();
+                return;
             }
+
+            this.restart_count++;
+
+            if (this.restart_count > LiveTranscoder.MAX_RESTARTS) {
+                this.emit('error', new Error(
+                    `ffmpeg exceeded maximum restart attempts (${LiveTranscoder.MAX_RESTARTS})`));
+                this.emitter.emit('abort');
+                return;
+            }
+
+            const delay = Math.min(1000 * Math.pow(2, this.restart_count - 1), 30_000);
+
+            setTimeout(() => this.start_ffmpeg(), delay);
+        };
+
+        this.process.on('error', error => {
+            this.emit('error', error);
+
+            handle_restart();
         });
 
         this.process.on('exit', code => {
             this.emit('exit', code);
 
-            if (!this.auto_restart) {
-                this.emitter.emit('abort');
-            } else {
-                this.start_ffmpeg();
-            }
+            handle_restart();
         });
 
         return true;

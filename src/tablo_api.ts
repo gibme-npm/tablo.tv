@@ -22,7 +22,7 @@ import fetch from '@gibme/fetch';
 import { v4 as uuid } from 'uuid';
 import { createHash, createHmac } from 'crypto';
 import type { Tablo } from './tablo';
-import Logger from '@gibme/logger';
+
 
 type Credentials = {
     access_key: string;
@@ -47,7 +47,7 @@ export class TabloAPI {
         this.options.ssl ??= false;
         this.options.device_id ??= uuid();
         this.options.timeout ??= 2000;
-        this.options.request_logging ??= false;
+
         this.options.port ??= 8887;
 
         if (hostOrUri.includes('://')) {
@@ -240,15 +240,6 @@ export class TabloAPI {
             url += `?${qs.toString()}`;
         }
 
-        if (this.options.request_logging) {
-            Logger.debug(
-                '%s %s %s %s',
-                method,
-                JSON.stringify(headers),
-                url,
-                payload ? JSON.stringify(payload) : ''
-            );
-        }
 
         return fetch(url, {
             headers,
@@ -299,7 +290,7 @@ export namespace TabloAPI {
         ssl: boolean;
         device_id: string;
         timeout: number;
-        request_logging: boolean;
+
         port: number;
     }
 }
