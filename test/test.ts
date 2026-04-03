@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { describe, it } from 'mocha';
+import { describe, it, before } from 'node:test';
 import Tablo, { Lighthouse, LiveTranscoder } from '../src';
 import assert from 'assert';
 import { config } from 'dotenv';
@@ -45,9 +45,9 @@ describe('Unit Tests', () => {
                 assert(Array.isArray(virtuals), 'virtual is not an array');
             });
 
-            it('Virtual Device', async function () {
+            it('Virtual Device', { skip: false }, async (t) => {
                 if (virtuals.length === 0) {
-                    return this.skip();
+                    return t.skip('no virtual devices available');
                 }
 
                 const device = await Lighthouse.virtualDevice(virtuals[0].serverId);
@@ -79,9 +79,9 @@ describe('Unit Tests', () => {
             const is_ready_context = (): boolean =>
                 is_ready() && context.length !== 0;
 
-            it('Account Info', async function () {
+            it('Account Info', { skip: false }, async (t) => {
                 if (!has_credentials()) {
-                    return this.skip();
+                    return t.skip('no credentials');
                 }
 
                 const info = await api.accountInfo();
@@ -98,9 +98,9 @@ describe('Unit Tests', () => {
                 server_id = info.devices[0].serverId;
             });
 
-            it('List Devices', async function () {
+            it('List Devices', { skip: false }, async (t) => {
                 if (!is_ready()) {
-                    return this.skip();
+                    return t.skip('not ready');
                 }
 
                 const received_devices = await api.devices();
@@ -109,9 +109,9 @@ describe('Unit Tests', () => {
                 assert(received_devices.length > 0, 'devices is empty');
             });
 
-            it('Resolve Device', async function () {
+            it('Resolve Device', { skip: false }, async (t) => {
                 if (!is_ready()) {
-                    return this.skip();
+                    return t.skip('not ready');
                 }
 
                 const device = await api.resolveDevice(server_id);
@@ -123,9 +123,9 @@ describe('Unit Tests', () => {
                 assert.equal(device.serverId, server_id, 'serverId is not equal');
             });
 
-            it('Select Device Context', async function () {
+            it('Select Device Context', { skip: false }, async (t) => {
                 if (!is_ready()) {
-                    return this.skip();
+                    return t.skip('not ready');
                 }
 
                 const received_context = await api.selectDeviceContext(profile_id, server_id);
@@ -137,9 +137,9 @@ describe('Unit Tests', () => {
                 context = received_context;
             });
 
-            it('List Guide Channels', async function () {
+            it('List Guide Channels', { skip: false }, async (t) => {
                 if (!is_ready_context()) {
-                    return this.skip();
+                    return t.skip('not ready');
                 }
 
                 channels = await api.guideChannels(context);
@@ -148,9 +148,9 @@ describe('Unit Tests', () => {
                 assert(channels.length > 0, 'channels is empty');
             });
 
-            it('List Current Live Airings', async function () {
+            it('List Current Live Airings', { skip: false }, async (t) => {
                 if (!is_ready_context()) {
-                    return this.skip();
+                    return t.skip('not ready');
                 }
 
                 const airings = await api.currentLiveAirings(context);
@@ -159,9 +159,9 @@ describe('Unit Tests', () => {
                 assert(airings.length > 0, 'airings is empty');
             });
 
-            it('Get Channel Airings', async function () {
+            it('Get Channel Airings', { skip: false }, async (t) => {
                 if (!is_ready_context() || channels.length === 0) {
-                    return this.skip();
+                    return t.skip('not ready');
                 }
 
                 const airings = await api.channelAirings(channels[0].identifier, context);
@@ -208,9 +208,9 @@ describe('Unit Tests', () => {
         });
 
         describe('General Methods', () => {
-            it('Device Information', async function () {
+            it('Device Information', { skip: false }, async (t) => {
                 if (!is_ready()) {
-                    return this.skip();
+                    return t.skip('not ready');
                 }
 
                 const info = await api.info();
@@ -218,9 +218,9 @@ describe('Unit Tests', () => {
                 assert(info, 'info is undefined');
             });
 
-            it('Settings', async function () {
+            it('Settings', { skip: false }, async (t) => {
                 if (!is_ready()) {
-                    return this.skip();
+                    return t.skip('not ready');
                 }
 
                 const settings = await api.settings();
@@ -228,9 +228,9 @@ describe('Unit Tests', () => {
                 assert(settings, 'settings is undefined');
             });
 
-            it('Storage', async function () {
+            it('Storage', { skip: false }, async (t) => {
                 if (!is_ready()) {
-                    return this.skip();
+                    return t.skip('not ready');
                 }
 
                 const storage = await api.storage();
@@ -238,9 +238,9 @@ describe('Unit Tests', () => {
                 assert(storage, 'storage is undefined');
             });
 
-            it('Tuners', async function () {
+            it('Tuners', { skip: false }, async (t) => {
                 if (!is_ready()) {
-                    return this.skip();
+                    return t.skip('not ready');
                 }
 
                 const tuners = await api.tuners();
@@ -260,9 +260,9 @@ describe('Unit Tests', () => {
                 }
             });
 
-            it('Hard Drives', async function () {
+            it('Hard Drives', { skip: false }, async (t) => {
                 if (!is_ready()) {
-                    return this.skip();
+                    return t.skip('not ready');
                 }
 
                 const drives = await api.hardDrives();
@@ -271,9 +271,9 @@ describe('Unit Tests', () => {
                 assert(drives.length > 0, 'drives is empty');
             });
 
-            it('Location', async function () {
+            it('Location', { skip: false }, async (t) => {
                 if (!is_ready()) {
-                    return this.skip();
+                    return t.skip('not ready');
                 }
 
                 const location = await api.location();
@@ -281,9 +281,9 @@ describe('Unit Tests', () => {
                 assert(location, 'location is undefined');
             });
 
-            it('Device Subscription', async function () {
+            it('Device Subscription', { skip: false }, async (t) => {
                 if (!is_ready()) {
-                    return this.skip();
+                    return t.skip('not ready');
                 }
 
                 const subscription = await api.deviceSubscription();
@@ -291,9 +291,9 @@ describe('Unit Tests', () => {
                 assert(subscription, 'subscription is undefined');
             });
 
-            it('Account Subscription', async function () {
+            it('Account Subscription', { skip: false }, async (t) => {
                 if (!is_ready()) {
-                    return this.skip();
+                    return t.skip('not ready');
                 }
 
                 const subscription = await api.accountSubscription();
@@ -301,9 +301,9 @@ describe('Unit Tests', () => {
                 assert(subscription, 'subscription is undefined');
             });
 
-            it('Capabilities', async function () {
+            it('Capabilities', { skip: false }, async (t) => {
                 if (!is_ready()) {
-                    return this.skip();
+                    return t.skip('not ready');
                 }
 
                 const capabilities = await api.capabilities();
@@ -314,9 +314,9 @@ describe('Unit Tests', () => {
         });
 
         describe('Updates', () => {
-            it('Update Information', async function () {
+            it('Update Information', { skip: false }, async (t) => {
                 if (!is_ready()) {
-                    return this.skip();
+                    return t.skip('not ready');
                 }
 
                 const update = await api.updateInfo();
@@ -324,9 +324,9 @@ describe('Unit Tests', () => {
                 assert(update, 'update is undefined');
             });
 
-            it('Update Progress', async function () {
+            it('Update Progress', { skip: false }, async (t) => {
                 if (!is_ready()) {
-                    return this.skip();
+                    return t.skip('not ready');
                 }
 
                 await api.updateProgress();
@@ -338,9 +338,9 @@ describe('Unit Tests', () => {
         describe('Channels', () => {
             let scan_idx: number | string = 0;
 
-            it('Channel Scan Information', async function () {
+            it('Channel Scan Information', { skip: false }, async (t) => {
                 if (!is_ready()) {
-                    return this.skip();
+                    return t.skip('not ready');
                 }
 
                 const scan = await api.channelScanInfo();
@@ -350,9 +350,9 @@ describe('Unit Tests', () => {
                 scan_idx = scan.object_id;
             });
 
-            it('Channel Scan Information (with scan_idx)', async function () {
+            it('Channel Scan Information (with scan_idx)', { skip: false }, async (t) => {
                 if (!is_ready()) {
-                    return this.skip();
+                    return t.skip('not ready');
                 }
 
                 const scan = await api.channelScanInfo(scan_idx);
@@ -360,9 +360,9 @@ describe('Unit Tests', () => {
                 assert(scan, 'scan is undefined');
             });
 
-            it('Channels', async function () {
+            it('Channels', { skip: false }, async (t) => {
                 if (!is_ready()) {
-                    return this.skip();
+                    return t.skip('not ready');
                 }
 
                 channels = await api.channels();
@@ -371,9 +371,9 @@ describe('Unit Tests', () => {
                 assert(channels.length > 0, 'channels is empty');
             });
 
-            it('Channel (by identifier)', async function () {
+            it('Channel (by identifier)', { skip: false }, async (t) => {
                 if (!is_ready_channels()) {
-                    return this.skip();
+                    return t.skip('not ready');
                 }
 
                 const channel = await api.channel(channels[0].channel_identifier);
@@ -383,16 +383,16 @@ describe('Unit Tests', () => {
                     'channel_identifier mismatch');
             });
 
-            it('Channel (by path)', async function () {
+            it('Channel (by path)', { skip: false }, async (t) => {
                 if (!is_ready()) {
-                    return this.skip();
+                    return t.skip('not ready');
                 }
 
                 const tuners = await api.tuners();
                 const active = tuners.find(t => t.channel !== null);
 
                 if (!active) {
-                    return this.skip();
+                    return t.skip('no active tuner');
                 }
 
                 const channel = active.channel!;
@@ -403,9 +403,9 @@ describe('Unit Tests', () => {
                 assert.strictEqual(typeof channel.minor, 'number', 'minor is not a number');
             });
 
-            it('Guide Status', async function () {
+            it('Guide Status', { skip: false }, async (t) => {
                 if (!is_ready()) {
-                    return this.skip();
+                    return t.skip('not ready');
                 }
 
                 const info = await api.guideStatus();
@@ -413,13 +413,13 @@ describe('Unit Tests', () => {
                 assert(info, 'info is undefined');
             });
 
-            it('Airings - All', async function () {
+            it('Airings - All', { skip: false }, async (t) => {
                 if (!PULL_AIRINGS) {
-                    return this.skip();
+                    return t.skip('PULL_AIRINGS not set');
                 }
 
                 if (!is_ready()) {
-                    return this.skip();
+                    return t.skip('not ready');
                 }
 
                 const airings = await api.airings(true, undefined, undefined, (total, received) => {
@@ -430,13 +430,13 @@ describe('Unit Tests', () => {
                 assert(airings.length > 0, 'airings is empty');
             });
 
-            it('Airings - Filtered', async function () {
+            it('Airings - Filtered', { skip: false }, async (t) => {
                 if (!PULL_AIRINGS) {
-                    return this.skip();
+                    return t.skip('PULL_AIRINGS not set');
                 }
 
                 if (!is_ready()) {
-                    return this.skip();
+                    return t.skip('not ready');
                 }
 
                 const airings = await api.airings(false, undefined, undefined, (total, received) => {
@@ -464,23 +464,23 @@ describe('Unit Tests', () => {
                     };
                 };
 
-                it('Watch Channel', async function () {
+                it('Watch Channel', { skip: false }, async (t) => {
                     if (!is_ready_channels()) {
-                        return this.skip();
+                        return t.skip('not ready');
                     }
 
                     session = await api.watchChannel(channels[0].channel_identifier);
 
                     if (!session) {
-                        return this.skip();
+                        return t.skip('no session');
                     }
 
                     assert(session, 'session is undefined');
                 });
 
-                it('Get Session', async function () {
+                it('Get Session', { skip: false }, async (t) => {
                     if (!is_ready_session()) {
-                        return this.skip();
+                        return t.skip('not ready');
                     }
 
                     if (!session) {
@@ -493,9 +493,9 @@ describe('Unit Tests', () => {
                         'sessions are not equal');
                 });
 
-                it('Keepalive Session', async function () {
+                it('Keepalive Session', { skip: false }, async (t) => {
                     if (!is_ready_session()) {
-                        return this.skip();
+                        return t.skip('not ready');
                     }
 
                     if (!session) {
@@ -508,9 +508,9 @@ describe('Unit Tests', () => {
                         'sessions are not equal');
                 });
 
-                it('Delete Session', async function () {
+                it('Delete Session', { skip: false }, async (t) => {
                     if (!is_ready_session()) {
-                        return this.skip();
+                        return t.skip('not ready');
                     }
 
                     if (!session) {
@@ -536,12 +536,9 @@ describe('Unit Tests', () => {
                     }
                 });
 
-                it('Start Live Transcoding', async function () {
-                    // eslint-disable-next-line @typescript-eslint/no-this-alias
-                    const $this = this;
-
+                it('Start Live Transcoding', { skip: false }, async (t) => {
                     if (!is_ready_channels()) {
-                        return this.skip();
+                        return t.skip('not ready');
                     }
 
                     if (!transcoder) {
@@ -549,7 +546,7 @@ describe('Unit Tests', () => {
                             console.warn(`        ⚠ LiveTranscoder failed: ${transcoder_error.message}`);
                         }
 
-                        return this.skip();
+                        return t.skip('no transcoder');
                     }
 
                     const run = async (): Promise<void> =>
@@ -573,12 +570,16 @@ describe('Unit Tests', () => {
                             }
                         });
 
-                    return run().catch(() => $this.skip());
+                    try {
+                        await run();
+                    } catch {
+                        t.skip('transcoder run failed');
+                    }
                 });
 
-                it('Stop Live Transcoding', async function () {
+                it('Stop Live Transcoding', { skip: false }, async (t) => {
                     if (!transcoder?.active) {
-                        return this.skip();
+                        return t.skip('transcoder not active');
                     }
 
                     return new Promise((resolve, reject) => {
